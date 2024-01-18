@@ -3,12 +3,17 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"go.bug.st/serial"
 )
 
+var ComPort string
+var Speed int = 115200
+
 func main() {
 	fmt.Println("Gcode Macro by Npi")
+	getInputs()
 
 	ports, err := serial.GetPortsList()
 
@@ -23,15 +28,16 @@ func main() {
 	for _, port := range ports {
 		fmt.Printf("Found port: %v\n", port)
 	}
+	ComPort = "COM3"
 
 	mode := &serial.Mode{
-		BaudRate: 115200,
+		BaudRate: Speed,
 		Parity:   serial.NoParity,
 		DataBits: 8,
 		StopBits: serial.OneStopBit,
 	}
 
-	port, err := serial.Open("COM3", mode)
+	port, err := serial.Open(ComPort, mode)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -47,4 +53,13 @@ func main() {
 	}
 
 	fmt.Printf("Sent %v bytes\n", n)
+}
+
+func getInputs() {
+	jsonFile, err := os.Open("macro.json")
+	if err != nil {
+		fmt.Println(err)
+	}
+	fmt.Println("Json opened")
+	defer jsonFile.Close()
 }
