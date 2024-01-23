@@ -11,6 +11,12 @@ import (
 var ComPort string
 var Speed int = 115200
 
+type MacroSet struct {
+	ComPort  string   `json:"port"`
+	Speed    int      `json:"speed"`
+	Commands []string `json:"commands"`
+}
+
 func main() {
 	fmt.Println("Gcode Macro by Npi")
 	getInputs()
