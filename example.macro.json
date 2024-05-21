@@ -1,6 +1,8 @@
 {
+    "startDelay":10,
+    "commandDelay":1000,
     "port":"COM3",
-    "speed":"115200",
+    "speed":115200,
     "commands":[
        "G28 X",
        "G28 Y",
