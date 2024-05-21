@@ -68,6 +68,15 @@ func main() {
 		fmt.Printf("Sent %v bytes\n", n)
 	*/
 
+	for _, command := range MacroSet.Commands {
+		fmt.Println(command)
+		_, err := port.Write([]byte(command + "\n"))
+		if err != nil {
+			log.Fatal(err)
+		}
+		time.Sleep(time.Duration(MacroSet.Delay) * time.Millisecond)
+	}
+
 	fmt.Println("Macro ran succesfully")
 	fmt.Println("Thank you for using Gcode Macro")
 }
