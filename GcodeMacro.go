@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"go.bug.st/serial"
@@ -22,8 +23,23 @@ var MacroSet struct {
 }
 
 func main() {
-	fmt.Println("Gcode Macro by Npi")
-	getInputs()
+	fmt.Print("Gcode Macro by Npi\n\n")
+	fileList := getAvailableFiles()
+	var input string
+	fmt.Print("Please select a macro to run:\n\n")
+	for i, file := range fileList {
+		fmt.Println(i, ": ", file)
+	}
+	fmt.Println()
+	fmt.Scanln(&input)
+	j, err := strconv.Atoi(input)
+	if err != nil || j > len(fileList)-1 {
+		log.Fatal("invalid input")
+	}
+	fmt.Println("running " + fileList[j])
+	os.Exit(1)
+
+	getInputs(fileList[j])
 
 	ports, err := serial.GetPortsList()
 
@@ -59,14 +75,6 @@ func main() {
 
 	fmt.Println("Waiting for startup")
 	time.Sleep(time.Duration(MacroSet.StartDelay) * time.Second)
-	/*
-		n, err := port.Write([]byte("G28 X Y\n"))
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		fmt.Printf("Sent %v bytes\n", n)
-	*/
 
 	for _, command := range MacroSet.Commands {
 		fmt.Println(command)
@@ -81,7 +89,7 @@ func main() {
 	fmt.Println("Thank you for using Gcode Macro")
 }
 
-func getInputs() {
+func getInputs(fileName string) {
 
 	jsonFile, err := os.Open("macro.json")
 	if err != nil {
@@ -98,4 +106,27 @@ func getInputs() {
 		log.Fatal(err)
 	}
 	fmt.Println("Json Parsed")
+}
+
+func getAvailableFiles() []string {
+	var list []string
+
+	dir, err := os.Open(".")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer dir.Close()
+	files, err := dir.Readdirnames(25)
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, f := range files {
+
+		if len(f) > 5 {
+			if f[len(f)-5:] == ".json" {
+				list = append(list, f)
+			}
+		}
+	}
+	return list
 }
