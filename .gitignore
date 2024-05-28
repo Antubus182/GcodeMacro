@@ -23,3 +23,8 @@ go.work
 macro.csv
 macro.json
 notes.md
+
+#macro files but not the example
+*.json
+!example.macro.json
+!example.json
