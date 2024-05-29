@@ -11,9 +11,6 @@ import (
 	"go.bug.st/serial"
 )
 
-var ComPort string
-var Speed int = 115200
-
 var MacroSet struct {
 	ComPort    string   `json:"port"`
 	Speed      int      `json:"speed"`
@@ -56,13 +53,13 @@ func main() {
 	}
 
 	mode := &serial.Mode{
-		BaudRate: Speed,
+		BaudRate: MacroSet.Speed,
 		Parity:   serial.NoParity,
 		DataBits: 8,
 		StopBits: serial.OneStopBit,
 	}
-	ComPort = MacroSet.ComPort
-	port, err := serial.Open(ComPort, mode)
+
+	port, err := serial.Open(MacroSet.ComPort, mode)
 	if err != nil {
 		fmt.Println("error opening Serial")
 		log.Fatal(err)
