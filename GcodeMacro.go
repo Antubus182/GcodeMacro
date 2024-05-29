@@ -91,7 +91,7 @@ func main() {
 
 func getInputs(fileName string) {
 
-	jsonFile, err := os.Open("macro.json")
+	jsonFile, err := os.Open(fileName)
 	if err != nil {
 		fmt.Println("error opening Json")
 		log.Fatal(err)
@@ -116,7 +116,7 @@ func getAvailableFiles() []string {
 		log.Fatal(err)
 	}
 	defer dir.Close()
-	files, err := dir.Readdirnames(25)
+	files, err := dir.Readdirnames(50)
 	if err != nil {
 		log.Fatal(err)
 	}
