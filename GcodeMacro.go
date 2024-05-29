@@ -21,24 +21,75 @@ var MacroSet struct {
 
 var Port serial.Port
 
+var Completed bool = false
+
 func main() {
 	fmt.Print("Gcode Macro by Npi\n\n")
 	fileList := getAvailableFiles()
 	var input string
-	fmt.Print("Please select a macro to run:\n\n")
-	for i, file := range fileList {
-		fmt.Println(i, ": ", file)
-	}
-	fmt.Println()
-	fmt.Scanln(&input)
-	j, err := strconv.Atoi(input)
-	if err != nil || j > len(fileList)-1 {
-		log.Fatal("invalid input")
-	}
-	fmt.Println("running " + fileList[j])
-	os.Exit(1)
+	for !Completed {
+		fmt.Print("Please select a macro to run:\n\n")
+		for i, file := range fileList {
+			fmt.Println(i, ": ", file)
+		}
+		fmt.Println()
+		fmt.Scanln(&input)
+		j, err := strconv.Atoi(input)
+		if err != nil || j > len(fileList) {
+			log.Fatal("invalid input")
+		}
+		if j == 0 {
+			Completed = true
+			break
+		}
+		fmt.Println("running " + fileList[j])
 
-	getInputs(fileList[j])
+		//os.Exit(1)
+
+		getInputs(fileList[j])
+
+		//SetupSerial()
+
+		DummyWrite()
+
+	}
+
+	fmt.Println("Thank you for using Gcode Macro")
+}
+
+func ReadSerial() {
+	// Read and print the response
+	buff := make([]byte, 100)
+	for {
+		// Reads up to 100 bytes
+		n, err := Port.Read(buff)
+		if err != nil {
+			log.Fatal(err)
+			break
+		}
+		if n == 0 {
+			fmt.Println("\nEOF")
+			break
+		}
+		fmt.Printf("%v", string(buff[:n]))
+	}
+
+}
+
+func WriteSerial() {
+	for _, command := range MacroSet.Commands {
+		fmt.Println(command)
+		_, err := Port.Write([]byte(command + "\n"))
+		if err != nil {
+			log.Fatal(err)
+		}
+		time.Sleep(time.Duration(MacroSet.Delay) * time.Millisecond)
+	}
+	fmt.Println("Macro completed")
+
+}
+
+func SetupSerial() {
 
 	ports, err := serial.GetPortsList()
 
@@ -75,36 +126,6 @@ func main() {
 	fmt.Println("Waiting for startup")
 	time.Sleep(time.Duration(MacroSet.StartDelay) * time.Second)
 
-	for _, command := range MacroSet.Commands {
-		fmt.Println(command)
-		_, err := Port.Write([]byte(command + "\n"))
-		if err != nil {
-			log.Fatal(err)
-		}
-		time.Sleep(time.Duration(MacroSet.Delay) * time.Millisecond)
-	}
-
-	fmt.Println("Macro ran succesfully")
-	fmt.Println("Thank you for using Gcode Macro")
-}
-
-func ReadSerial() {
-	// Read and print the response
-	buff := make([]byte, 100)
-	for {
-		// Reads up to 100 bytes
-		n, err := Port.Read(buff)
-		if err != nil {
-			log.Fatal(err)
-			break
-		}
-		if n == 0 {
-			fmt.Println("\nEOF")
-			break
-		}
-		fmt.Printf("%v", string(buff[:n]))
-	}
-
 }
 
 func getInputs(fileName string) {
@@ -128,7 +149,7 @@ func getInputs(fileName string) {
 
 func getAvailableFiles() []string {
 	var list []string
-
+	list = append(list, "Exit Program")
 	dir, err := os.Open(".")
 	if err != nil {
 		log.Fatal(err)
@@ -147,4 +168,12 @@ func getAvailableFiles() []string {
 		}
 	}
 	return list
+}
+
+func DummyWrite() {
+	for _, command := range MacroSet.Commands {
+		fmt.Println(command)
+		time.Sleep(time.Duration(MacroSet.Delay) * time.Millisecond)
+	}
+	fmt.Println("Macro completed")
 }
