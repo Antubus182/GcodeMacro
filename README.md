@@ -1,3 +1,7 @@
+# V1
+**29-05-2024**
+Version one suitable for experimentation, can choose to load in a selection of macro's for ease of use, there is however still a possibility to overload the serial buffer of a 3D printer, this will be resolved in a new version
+
 # MVP
 **28-05-2024**
 Minimal Viable Product is produced
