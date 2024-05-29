@@ -44,13 +44,12 @@ func main() {
 		}
 		fmt.Println("running " + fileList[j])
 
-		//os.Exit(1)
-
 		getInputs(fileList[j])
 
-		//SetupSerial()
+		SetupSerial()
 
-		DummyWrite()
+		//DummyWrite()
+		WriteSerial()
 
 	}
 
