@@ -19,12 +19,12 @@ var MacroSet struct {
 	Delay      int      `json:"commandDelay"`
 }
 
-var Port serial.Port
-
 var Completed bool = false
+var FirstRun bool = true
 
 func main() {
 	fmt.Print("Gcode Macro by Npi\n\n")
+	var port serial.Port
 	fileList := getAvailableFiles()
 	var input string
 	for !Completed {
@@ -45,19 +45,23 @@ func main() {
 		fmt.Println("running " + fileList[j])
 
 		getInputs(fileList[j])
-
-		SetupSerial()
+		if FirstRun {
+			port = SetupSerial()
+			defer port.Close()
+			FirstRun = false
+		}
 
 		//DummyWrite()
-		WriteSerial()
+		WriteSerial(port)
 
 	}
-	Port.Close()
+
 	fmt.Println("Thank you for using Gcode Macro")
 }
 
-func ReadSerial() {
+func ReadSerial(Port serial.Port) {
 	// Read and print the response
+
 	buff := make([]byte, 100)
 	for {
 		// Reads up to 100 bytes
@@ -75,10 +79,10 @@ func ReadSerial() {
 
 }
 
-func WriteSerial() {
+func WriteSerial(port serial.Port) {
 	for _, command := range MacroSet.Commands {
 		fmt.Println(command)
-		_, err := Port.Write([]byte(command + "\n"))
+		_, err := port.Write([]byte(command + "\n"))
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -88,7 +92,7 @@ func WriteSerial() {
 
 }
 
-func SetupSerial() {
+func SetupSerial() serial.Port {
 
 	ports, err := serial.GetPortsList()
 
@@ -124,6 +128,7 @@ func SetupSerial() {
 
 	fmt.Println("Waiting for startup")
 	time.Sleep(time.Duration(MacroSet.StartDelay) * time.Second)
+	return Port
 
 }
 
