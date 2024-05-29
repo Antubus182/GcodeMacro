@@ -52,7 +52,7 @@ func main() {
 		WriteSerial()
 
 	}
-
+	Port.Close()
 	fmt.Println("Thank you for using Gcode Macro")
 }
 
